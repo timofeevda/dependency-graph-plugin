@@ -28,6 +28,8 @@ import org.sonatype.aether.graph.DependencyNode;
 import org.sonatype.aether.graph.DependencyVisitor;
 import org.sonatype.aether.resolution.ArtifactResolutionException;
 import org.timofeevda.dependencygraph.plugin.utils.jaxb.gexf.GexfElementFactory;
+import org.timofeevda.dependencygraph.plugin.utils.jaxb.ygraphml.GraphmlBuilder;
+import org.timofeevda.dependencygraph.plugin.utils.jaxb.ygraphml.YGraphMLFileHandler;
 
 /**
  * Goal for dependencies graph extraction
@@ -39,6 +41,7 @@ public class GraphMojo extends AbstractBaseMojo {
 
     private static final String GROUP_ID_SEPARATOR = ",";
     private static final String DEPENDENCIES_GRAPH_FILE = "dependencygraph.gexf";
+    private static final String DEPENDENCIES_GRAPHML_FILE = "dependencygraph.graphml";
 
     /**
      * Flag denoting the type of dependencies traversal (transitive or not)
@@ -110,7 +113,7 @@ public class GraphMojo extends AbstractBaseMojo {
      * @throws JAXBException
      */
     private void createDependencyGraph() throws FileNotFoundException, JAXBException {
-        File graphFile = resolveGraphFileLocation();
+        File graphFile = resolveGraphFileLocation(DEPENDENCIES_GRAPH_FILE);
 
         Optional<GexfContent> intermediateGraphContent = graphFile.exists() ?
                 Optional.of(GexfFileHandler.read(graphFile)) : Optional.empty();
@@ -129,6 +132,7 @@ public class GraphMojo extends AbstractBaseMojo {
                 .orElse(GexfElementFactory.createGEXF(nodesMap.values(), edgesMap.values()));
 
         GexfFileHandler.write(gexfContent, graphFile);
+        YGraphMLFileHandler.write(GraphmlBuilder.toGraphml(gexfContent), resolveGraphFileLocation(DEPENDENCIES_GRAPHML_FILE));
     }
 
     private GexfContent updateGraphContent(GexfContent gexfContent) {
@@ -147,17 +151,18 @@ public class GraphMojo extends AbstractBaseMojo {
         return gexfContent;
     }
 
-    private File resolveGraphFileLocation() {
+    private File resolveGraphFileLocation(String fileName) {
         File depsGraphFile;
         if (this.separateGraphs) {
             depsGraphFile = Paths.get(target, mavenProject.getGroupId()
                     + "." + mavenProject.getArtifactId()
                     + ":" + mavenProject.getVersion() + ".gexf").toFile();
         } else {
-            depsGraphFile = Paths.get(target, DEPENDENCIES_GRAPH_FILE).toFile();
+            depsGraphFile = Paths.get(target, fileName).toFile();
         }
         return depsGraphFile;
     }
+
 
     private void populateGraphMaps(GexfContent gexf) {
         populateNodesMap(gexf);

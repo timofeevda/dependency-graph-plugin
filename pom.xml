@@ -34,14 +34,27 @@
                 <artifactId>maven-jaxb2-plugin</artifactId>
                 <version>0.11.0</version>
                 <configuration>
-                    <schemaDirectory>src/main/resources/jaxb/</schemaDirectory>
+                    <extension>true</extension>
                     <addCompileSourceRoot>true</addCompileSourceRoot>
+                    <bindingDirectory>src/main/resources</bindingDirectory>
+                    <bindingIncludes>
+                        <include>**/*.xjb</include>
+                    </bindingIncludes>
                     <schemas>
                         <schema>
                             <fileset>
                                 <directory>${basedir}/src/main/resources/jaxb/gexf</directory>
                                 <includes>
                                     <include>gexf.xsd</include>
+                                </includes>
+                            </fileset>
+                        </schema>
+                        <schema>
+                            <fileset>
+                                <!-- http://www.yworks.com/xml/schema/graphml/1.1/ygraphml.xsd -->
+                                <directory>${basedir}/src/main/resources/jaxb/ygraphml</directory>
+                                <includes>
+                                    <include>ygraphml.xsd</include>
                                 </includes>
                             </fileset>
                         </schema>
@@ -79,6 +92,11 @@
             <artifactId>lombok</artifactId>
             <version>${lombok.version}</version>
             <scope>provided</scope>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.bind</groupId>
+            <artifactId>jaxb-impl</artifactId>
+            <version>2.2.7</version>
         </dependency>
     </dependencies>
 
